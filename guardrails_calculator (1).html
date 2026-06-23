@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>護欄策略計算器</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F2F1F3;
+  --surface: #FCFBFC;
+  --surface-2: #ECEAEE;
+  --ink: #2D2A35;
+  --ink-soft: #6E6878;
+  --ink-faint: #A39EAC;
+  --line: #DEDAE2;
+  --blue: #8FA3AC;
+  --blue-soft: #DDE5E8;
+  --blue-deep: #5C7079;
+  --orange: #B89AA0;
+  --orange-soft: #EBDDE0;
+  --warn: #8B6D74;
+  --warn-soft: #E4D6D9;
+  --safe: #7E8A88;
+  --safe-soft: #DCE2E0;
+  --plum: #6B5E6B;
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(45,42,53,0.04), 0 6px 24px rgba(45,42,53,0.06);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Noto Serif TC', serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+/* Header */
+.head { margin-bottom: 36px; }
+.eyebrow {
+  font-family: 'Spline Sans Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 10px;
+}
+.head h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 2.1rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.head p { color: var(--ink-soft); font-size: 0.98rem; max-width: 56ch; }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 26px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.card:hover {
+  box-shadow: 0 1px 3px rgba(45,42,53,0.05), 0 10px 34px rgba(45,42,53,0.07);
+}
+.card-title {
+  font-family: 'Spline Sans Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--blue);
+}
+.note {
+  background: var(--blue-soft);
+  border-radius: 10px;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+  color: var(--blue-deep);
+  line-height: 1.7;
+  display: flex;
+  gap: 10px;
+}
+.note::before {
+  content: '提示';
+  font-family:'Spline Sans Mono',monospace;
+  font-size:0.62rem; letter-spacing:0.1em;
+  background: var(--surface); color: var(--blue);
+  padding: 2px 7px; border-radius: 6px;
+  height: fit-content; flex-shrink:0; margin-top:2px;
+}
+.note.warm { background: var(--orange-soft); color:var(--plum); }
+.note.warm::before { color: var(--orange); }
+
+/* Inputs */
+.field { margin-bottom: 20px; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.input-line {
+  display: flex; align-items: center; gap: 12px;
+}
+.input-line input[type=number] {
+  flex: 1;
+  font-family: 'Spline Sans Mono', monospace;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  width: 100%;
+  transition: border-color 0.2s, background 0.2s;
+}
+.input-line input[type=number]:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: var(--surface);
+}
+.unit { font-family:'Spline Sans Mono',monospace; font-size:0.85rem; color: var(--ink-faint); white-space: nowrap; }
+
+.slider-row { display:flex; align-items:center; gap:14px; margin-top:4px; }
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  flex: 1; height: 4px; border-radius: 4px;
+  background: var(--line); cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--blue); border: 3px solid var(--surface);
+  box-shadow: 0 1px 4px rgba(45,42,53,0.2);
+}
+input[type=range]::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--blue); border: 3px solid var(--surface);
+  box-shadow: 0 1px 4px rgba(45,42,53,0.2);
+}
+.slider-val {
+  font-family:'Spline Sans Mono',monospace; font-weight:600;
+  font-size: 1rem; color: var(--blue-deep);
+  min-width: 56px; text-align: right;
+}
+
+/* The three numbers */
+.numbers-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+}
+.num-block {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 18px 14px;
+  text-align: center;
+  position: relative;
+  border: 1px solid var(--line);
+}
+.num-block.upper { background: var(--orange-soft); border-color: #DBC9CE; }
+.num-block.lower { background: var(--safe-soft); border-color: #CCD6D3; }
+.num-block .nl {
+  font-size: 0.78rem; color: var(--ink-soft); margin-bottom: 6px;
+}
+.num-block .nv {
+  font-family:'Spline Sans Mono',monospace;
+  font-weight:600; font-size: 1.6rem; letter-spacing:-0.02em;
+}
+.num-block.upper .nv { color: #8B6D74; }
+.num-block.lower .nv { color: #5F6E6A; }
+.num-block .start .nv { color: var(--blue-deep); }
+.num-block .ns { font-size:0.72rem; color: var(--ink-faint); margin-top:3px; font-family:'Spline Sans Mono',monospace; }
+.num-block .nm {
+  font-size:0.7rem; color: var(--ink-soft); margin-top:5px;
+  padding-top:5px; border-top:1px dashed var(--line);
+  font-family:'Spline Sans Mono',monospace;
+}
+
+/* Gauge */
+.gauge-wrap { margin: 24px 0 8px; }
+.gauge {
+  position: relative; height: 52px;
+  border-radius: 26px; overflow: hidden;
+  background: linear-gradient(90deg,
+    var(--safe-soft) 0%, var(--safe-soft) 22%,
+    var(--blue-soft) 30%, var(--blue-soft) 70%,
+    var(--orange-soft) 78%, var(--warn-soft) 100%);
+  border: 1px solid var(--line);
+}
+.gauge-zone-label {
+  position:absolute; top:50%; transform:translateY(-50%);
+  font-family:'Spline Sans Mono',monospace; font-size:0.68rem;
+  color: var(--ink-soft); letter-spacing:0.04em;
+}
+.gz-low { left: 14px; }
+.gz-mid { left: 50%; transform: translate(-50%,-50%); color: var(--blue-deep); }
+.gz-high { right: 14px; }
+.gauge-marker {
+  position:absolute; top:-4px; bottom:-4px; width:3px;
+  background: var(--ink); border-radius:2px;
+  transition: left 0.5s cubic-bezier(.4,0,.2,1);
+  z-index: 3;
+}
+.gauge-marker::after {
+  content:''; position:absolute; top:-7px; left:50%;
+  transform:translateX(-50%);
+  border-left:6px solid transparent; border-right:6px solid transparent;
+  border-top:7px solid var(--ink);
+}
+.gauge-bounds { display:flex; justify-content:space-between; margin-top:8px;
+  font-family:'Spline Sans Mono',monospace; font-size:0.72rem; color:var(--ink-faint); }
+
+/* Result panel */
+.result {
+  border-radius: 12px; padding: 22px;
+  margin-top: 4px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  transition: background 0.3s, border-color 0.3s;
+}
+.result.action-up { background: var(--safe-soft); border-color:#CCD6D3; }
+.result.action-down { background: var(--warn-soft); border-color:#D9C7CB; }
+.result.action-hold { background: var(--blue-soft); border-color:#CDD8DC; }
+.result-tag {
+  display:inline-block;
+  font-family:'Spline Sans Mono',monospace; font-size:0.7rem;
+  letter-spacing:0.1em; text-transform:uppercase;
+  padding: 4px 10px; border-radius: 20px; margin-bottom: 12px;
+  background: var(--surface); color: var(--ink-soft);
+}
+.result.action-up .result-tag { color:#5F6E6A; }
+.result.action-down .result-tag { color: var(--warn); }
+.result.action-hold .result-tag { color: var(--blue-deep); }
+.result h3 { font-family:'Fraunces',serif; font-weight:500; font-size:1.25rem; margin-bottom:6px; }
+.result .big {
+  font-family:'Spline Sans Mono',monospace; font-weight:600;
+  font-size: 2rem; letter-spacing:-0.02em; margin: 8px 0 4px;
+}
+.result .sub { color: var(--ink-soft); font-size:0.92rem; }
+.result .month { font-family:'Spline Sans Mono',monospace; color:var(--ink); font-weight:500; }
+
+.calc-line {
+  font-family:'Spline Sans Mono',monospace; font-size:0.82rem;
+  color: var(--ink-soft); background: var(--surface);
+  padding: 10px 14px; border-radius: 8px; margin-top:14px;
+  border: 1px solid var(--line);
+}
+
+/* Rules reference */
+.rules { display:grid; gap:12px; }
+.rule {
+  display:flex; gap:14px; align-items:flex-start;
+  padding: 14px 16px; background: var(--surface-2);
+  border-radius: 10px; border:1px solid var(--line);
+}
+.rule-n {
+  font-family:'Fraunces',serif; font-weight:600; font-size:1.1rem;
+  color: var(--blue); flex-shrink:0;
+  width: 30px; height:30px; border-radius:50%;
+  background: var(--blue-soft); display:flex; align-items:center; justify-content:center;
+}
+.rule-body strong { font-weight:600; display:block; margin-bottom:2px; font-size:0.95rem; }
+.rule-body span { color: var(--ink-soft); font-size:0.88rem; }
+
+.scenario-btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+.sbtn {
+  font-family:'Noto Serif TC',serif; font-size:0.86rem;
+  padding: 9px 16px; border-radius: 10px; cursor:pointer;
+  background: var(--surface-2); border:1px solid var(--line);
+  color: var(--ink-soft); transition: all 0.2s;
+}
+.sbtn:hover { border-color: var(--blue); color: var(--blue-deep); background: var(--surface); }
+
+.foot { text-align:center; color:var(--ink-faint); font-size:0.8rem;
+  margin-top:36px; font-family:'Spline Sans Mono',monospace; }
+
+@media (max-width:560px) {
+  .wrap { padding: 32px 16px 60px; }
+  .head h1 { font-size: 1.7rem; }
+  .numbers-grid { grid-template-columns:1fr; }
+  .result .big { font-size:1.6rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="eyebrow">Guyton-Klinger Guardrails</div>
+    <h1>護欄策略計算器</h1>
+    <p>退休後最難的問題：今年該賣掉多少股票當生活費，才不會太早花光、也不會省到捨不得花？這個工具幫你每年算一次。設定一次起始條件，之後每年底只要填兩個數字。</p>
+  </div>
+
+  <!-- Setup -->
+  <div class="card">
+    <div class="card-title">起始設定</div>
+    <div class="note">退休第一天填一次就好。<b>提領率</b>就是「你一年花的錢 ÷ 你的總資產」算出的百分比——越高代表花得越凶。Morningstar 研究建議的起點約 5.3%。</div>
+    <div class="field">
+      <label>退休時的投資組合（萬）</label>
+      <div class="input-line">
+        <input type="number" id="portfolio" value="2000" min="0" step="50">
+        <span class="unit">萬元</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>起始提領率</label>
+      <div class="slider-row">
+        <input type="range" id="startRate" min="3" max="7" step="0.1" value="5.3">
+        <span class="slider-val" id="startRateVal">5.3%</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>護欄寬度（上下界 ± 起始率的百分比）</label>
+      <div class="slider-row">
+        <input type="range" id="guardWidth" min="10" max="30" step="1" value="20">
+        <span class="slider-val" id="guardWidthVal">20%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- The three numbers -->
+  <div class="card">
+    <div class="card-title">三個數字</div>
+    <div class="note">把這三個數字想成<b>車道的兩條線</b>。中間是你的正常車道，上界是「花太凶」的警戒線，下界是「花太省」的警戒線。只要沒壓到線，就安心開。</div>
+    <div class="numbers-grid">
+      <div class="num-block lower">
+        <div class="nl">下界護欄</div>
+        <div class="nv" id="lowerRate">4.2%</div>
+        <div class="ns" id="lowerAmt">84 萬</div>
+        <div class="nm" id="lowerMonth">月 7.0 萬</div>
+      </div>
+      <div class="num-block">
+        <div class="start">
+          <div class="nl">起始提領率</div>
+          <div class="nv" id="startShow">5.3%</div>
+          <div class="ns" id="startAmt">106 萬</div>
+          <div class="nm" id="startMonth">月 8.8 萬</div>
+        </div>
+      </div>
+      <div class="num-block upper">
+        <div class="nl">上界護欄</div>
+        <div class="nv" id="upperRate">6.4%</div>
+        <div class="ns" id="upperAmt">128 萬</div>
+        <div class="nm" id="upperMonth">月 10.7 萬</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Annual check -->
+  <div class="card">
+    <div class="card-title">每年底花十分鐘：填兩個數字</div>
+    <div class="note">這是你每年唯一要做的事。填好下面兩格，工具會用「① ÷ ②」算出今年的提領率，再告訴你明年該賣多少。不用懂數學。</div>
+    <div class="field">
+      <label>① 去年我賣了多少錢過生活（萬）</label>
+      <div class="input-line">
+        <input type="number" id="currentDraw" value="108" min="0" step="0.5">
+        <span class="unit">萬元</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>② 現在我的資產總共值多少（打開券商看）（萬）</label>
+      <div class="input-line">
+        <input type="number" id="currentValue" value="1600" min="0" step="10">
+        <span class="unit">萬元</span>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label>不知道怎麼填？點一下看範例</label>
+      <div class="scenario-btns">
+        <button class="sbtn" onclick="setScenario(108,1600)">市場大跌時</button>
+        <button class="sbtn" onclick="setScenario(106,2800)">市場大好時</button>
+        <button class="sbtn" onclick="setScenario(108,2050)">平穩的一年</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gauge + result -->
+  <div class="card">
+    <div class="card-title">你現在落在哪裡</div>
+    <div class="note">黑色指針就是你今年的位置。<b>偏左=資產長太好</b>，可以多花一點；<b>偏右=資產縮水了</b>，該省一點；落在中間就什麼都不用動。</div>
+    <div class="gauge-wrap">
+      <div class="gauge">
+        <span class="gauge-zone-label gz-low">加薪區</span>
+        <span class="gauge-zone-label gz-mid">安全區</span>
+        <span class="gauge-zone-label gz-high">減薪區</span>
+        <div class="gauge-marker" id="marker" style="left:50%"></div>
+      </div>
+      <div class="gauge-bounds">
+        <span id="boundLow">4.2%</span>
+        <span style="color:var(--ink-soft)">目前 <strong id="curRateLabel" style="color:var(--ink);font-weight:600">6.75%</strong></span>
+        <span id="boundHigh">6.4%</span>
+      </div>
+    </div>
+
+    <div class="result" id="result">
+      <span class="result-tag" id="resultTag">護欄啟動</span>
+      <h3 id="resultTitle">減少提領 10%</h3>
+      <div class="big" id="resultAmt">97.2 萬</div>
+      <div class="sub">明年提領 · <span class="month" id="resultMonth">每月約 8.1 萬</span></div>
+      <div class="calc-line" id="calcLine"></div>
+    </div>
+  </div>
+
+  <!-- Rules -->
+  <div class="card">
+    <div class="card-title">三條規則</div>
+    <div class="note warm">護欄策略最特別的地方在<b>規則三的加薪</b>：當資產長得夠好，它會主動準你多花。傳統 4% 法則只會叫你死守當初的金額，就算資產已經翻倍也不敢花。</div>
+    <div class="rules">
+      <div class="rule">
+        <div class="rule-n">1</div>
+        <div class="rule-body">
+          <strong>正常年份，給自己通膨加薪</strong>
+          <span>提領率落在護欄之間，按通膨調整提領金額，其他什麼都不用做。</span>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="rule-n">2</div>
+        <div class="rule-body">
+          <strong>虧損年份，跳過通膨加薪</strong>
+          <span>投資組合下跌的年份不加薪，提領金額維持跟去年一樣。不減少，只是不加。</span>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="rule-n">3</div>
+        <div class="rule-body">
+          <strong>衝出護欄，調整 10%</strong>
+          <span>超過上界就減 10%；低於下界就加 10%。市場大跌後本能想少花，這時直覺剛好跟最佳決策一致。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">每年底算一次 · 不需要懂數學</div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function fmt(n){
+  return Math.round(n*10)/10;
+}
+function monthStr(annual){
+  const m = annual/12;
+  return '每月約 ' + (Math.round(m*10)/10) + ' 萬';
+}
+function monthShort(annual){
+  return '月 ' + (Math.round(annual/12*10)/10) + ' 萬';
+}
+
+function recalc(){
+  const portfolio = parseFloat($('portfolio').value) || 0;
+  const startRate = parseFloat($('startRate').value) || 0;
+  const width = parseFloat($('guardWidth').value) || 0;
+
+  const upperRate = startRate * (1 + width/100);
+  const lowerRate = startRate * (1 - width/100);
+  const startAmt = portfolio * startRate/100;
+  const upperAmt = portfolio * upperRate/100;
+  const lowerAmt = portfolio * lowerRate/100;
+
+  // setup displays
+  $('startRateVal').textContent = startRate.toFixed(1)+'%';
+  $('guardWidthVal').textContent = width+'%';
+  $('startShow').textContent = startRate.toFixed(1)+'%';
+  $('startAmt').textContent = fmt(startAmt)+' 萬';
+  $('upperRate').textContent = upperRate.toFixed(1)+'%';
+  $('upperAmt').textContent = fmt(upperAmt)+' 萬';
+  $('lowerRate').textContent = lowerRate.toFixed(1)+'%';
+  $('lowerAmt').textContent = fmt(lowerAmt)+' 萬';
+  $('startMonth').textContent = monthShort(startAmt);
+  $('upperMonth').textContent = monthShort(upperAmt);
+  $('lowerMonth').textContent = monthShort(lowerAmt);
+  $('boundLow').textContent = lowerRate.toFixed(1)+'%';
+  $('boundHigh').textContent = upperRate.toFixed(1)+'%';
+
+  // annual check
+  const draw = parseFloat($('currentDraw').value) || 0;
+  const value = parseFloat($('currentValue').value) || 1;
+  const curRate = draw / value * 100;
+
+  $('curRateLabel').textContent = curRate.toFixed(2)+'%';
+
+  // marker position: map curRate onto gauge.
+  // gauge: lower bound sits ~26% from left, upper ~74%; clamp outside.
+  const span = upperRate - lowerRate;
+  let pct;
+  if(span <= 0){ pct = 50; }
+  else {
+    // place lowerRate at 26%, upperRate at 74%
+    pct = 26 + (curRate - lowerRate)/span * 48;
+  }
+  pct = Math.max(3, Math.min(97, pct));
+  $('marker').style.left = pct+'%';
+
+  // decide action
+  const result = $('result');
+  result.classList.remove('action-up','action-down','action-hold');
+  let tag, title, newAmt, calc;
+
+  if(curRate > upperRate){
+    newAmt = draw * 0.9;
+    result.classList.add('action-down');
+    tag = '護欄啟動 · 減薪';
+    title = '減少提領 10%';
+    calc = draw+' 萬 ÷ '+value+' 萬 = '+curRate.toFixed(2)+'%，超過上界 '+upperRate.toFixed(1)+'% → '+draw+' × 0.9';
+  } else if(curRate < lowerRate){
+    newAmt = draw * 1.1;
+    result.classList.add('action-up');
+    tag = '護欄啟動 · 加薪';
+    title = '加薪 10%';
+    calc = draw+' 萬 ÷ '+value+' 萬 = '+curRate.toFixed(2)+'%，低於下界 '+lowerRate.toFixed(1)+'% → '+draw+' × 1.1';
+  } else {
+    newAmt = draw;
+    result.classList.add('action-hold');
+    tag = '安全區 · 維持';
+    title = '不用調整';
+    calc = draw+' 萬 ÷ '+value+' 萬 = '+curRate.toFixed(2)+'%，落在 '+lowerRate.toFixed(1)+'%–'+upperRate.toFixed(1)+'% 之間，正常年份按通膨加薪即可';
+  }
+
+  $('resultTag').textContent = tag;
+  $('resultTitle').textContent = title;
+  $('resultAmt').textContent = fmt(newAmt)+' 萬';
+  $('resultMonth').textContent = monthStr(newAmt);
+  $('calcLine').textContent = calc;
+}
+
+function setScenario(draw, value){
+  $('currentDraw').value = draw;
+  $('currentValue').value = value;
+  recalc();
+}
+
+document.querySelectorAll('input').forEach(el => el.addEventListener('input', recalc));
+recalc();
+</script>
+</body>
+</html>
