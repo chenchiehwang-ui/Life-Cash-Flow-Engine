@@ -644,10 +644,11 @@ function renderTiers(D,baseSpend,atRetireN){
       const ok=atRetireN>=need;
       status=`<span class="tstatus ${ok?'ok':'no'}"><span class="dot"></span>${ok?'退休可達':'差 '+fmtM(need-atRetireN)}</span>`;
     }
-    return `<div class="tier ${selectedTier===t.id?'sel':''}" style="--tc:${t.color}" onclick="pickTier('${t.id}')">
+return `<div class="tier ${selectedTier===t.id?'sel':''}" style="--tc:${t.color}" onclick="pickTier('${t.id}')">
       <span class="tname">${t.name}</span>
-      <span class="tzh">${t.zh}${t.coast?'':' · 年支出 '+fmtM(spend)}</span>
+      <span class="tzh">${t.zh}</span>
       <div class="tnum">${big}<small>${sub}</small></div>
+      <div class="tspend">退休後年支出 ${fmt(spend)}<br>≈ 每月可花 <b>${fmt(spend/12)}</b></div>
       ${status}
     </div>`;
   }).join('');
