@@ -38,6 +38,7 @@ body{
 header.top{
   padding:48px 0 28px;
   border-bottom:1px solid var(--line);
+  text-align:center;
 }
 .eyebrow{
   font-family:'Noto Sans TC',sans-serif;
@@ -50,8 +51,13 @@ header.top h1{
   line-height:1.08;letter-spacing:-.01em;
 }
 header.top h1 .zh{font-family:'Noto Serif TC',serif;font-weight:600}
+header.top h1 .subtitle{
+  display:block;margin-top:8px;
+  font-family:'Noto Serif TC',serif;font-weight:400;
+  font-size:clamp(1rem,2vw,1.4rem);color:var(--ink-soft);letter-spacing:.04em;
+}
 header.top p.sub{
-  margin-top:14px;max-width:60ch;color:var(--ink-soft);font-size:1.02rem;
+  margin:14px auto 0;max-width:60ch;color:var(--ink-soft);font-size:1.02rem;
 }
 
 /* main grid */
@@ -261,7 +267,7 @@ tbody tr.milestone td:first-child::after{content:" ●";color:var(--accent);font
 .tag{display:inline-block;font-family:'Noto Sans TC',sans-serif;font-size:.68rem;padding:1px 7px;border-radius:10px;background:var(--accent-wash);color:var(--accent);margin-left:7px;font-weight:500}
 .neg{color:var(--warn)}
 
-footer{padding:30px 0 50px;color:var(--ink-faint);font-size:.8rem;border-top:1px solid var(--line);max-width:80ch}
+footer{padding:30px 0 50px;color:var(--ink-faint);font-size:.8rem;border-top:1px solid var(--line);max-width:80ch;margin:0 auto;text-align:center}
 footer code{font-family:'Spline Sans Mono',monospace;background:var(--paper-2);padding:1px 5px;border-radius:4px;font-size:.85em}
 .toggle-row{display:flex;gap:6px}
 .toggle-btn{font-family:'Noto Sans TC',sans-serif;font-size:.78rem;padding:5px 12px;border:1px solid var(--line);background:var(--paper);border-radius:20px;cursor:pointer;color:var(--ink-soft);transition:all .15s}
@@ -272,8 +278,8 @@ footer code{font-family:'Spline Sans Mono',monospace;background:var(--paper-2);p
 
 <header class="top"><div class="wrap">
   <div class="eyebrow">Life Cash-Flow Engine · 動態試算</div>
-  <h1><span class="zh">你的人生財務現金流</span><br>recalculated as you move.</h1>
-  <p class="sub">這是原試算表的互動版本：所有數字由左側假設即時驅動，與 Excel 的逐年現金流公式完全一致。預設值以「30 歲、台北平均薪資與平均花費」為範本（年收入約 60 萬、年支出約 42 萬），你可以隨意調整任何一格，下方的資產曲線、退休判斷與明細表會同步重算。</p>
+  <h1><span class="zh">你的人生財務現金流</span><span class="subtitle">算出屬於你的自由年齡</span></h1>
+  <p class="sub">這份試算以「30 歲、台北平均薪資與平均花費」為共用範本（年收入約 60 萬、年支出約 42 萬）。所有數字由左側假設即時驅動，調整任何一格，下方的資產曲線、退休判斷與明細表都會同步重算——你可以直接套用,也能改成自己的數字。</p>
 </div></header>
 
 <div class="wrap">
@@ -870,4 +876,5 @@ window.addEventListener('resize',render);
 render();
 </script>
 </body>
+</html>
 </html>
